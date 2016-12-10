@@ -39,6 +39,10 @@ class TestRedis(unittest.TestCase):
         self.assertEqual(conn.get('kanji_character'), b'\xe6\xbc\xa2\xe5\xad\x97')
         self.assertEqual(conn.get('kanji_character').decode('utf-8'), '漢字')
 
+        conn.set('int_test', 1)
+        self.assertEqual(conn.incr('int_test'), 2)
+        self.assertEqual(conn.incrby('int_test', 3), 5)
+
         conn.close()
 
 if __name__ == "__main__":

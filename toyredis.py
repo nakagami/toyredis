@@ -64,6 +64,8 @@ class RedisConnection:
     def set(self, k, v):
         if isinstance(k, str):
             k = k.encode('utf-8')
+        if isinstance(v, int):
+            v = str(v)
         if isinstance(v, str):
             v = v.encode('utf-8')
         self._send(b'*3\r\n$3\r\nSET\r\n$%d\r\n%s\r\n$%d\r\n%s\r\n' % (len(k), k, len(v), v))
@@ -78,6 +80,21 @@ class RedisConnection:
         s = self._recv_line()
         ln = int(s[1:])
         return self._recv(ln+2)[:-2]
+
+    def incr(self, k):
+        if isinstance(k, str):
+            k = k.encode('utf-8')
+        self._send(b'*2\r\n$4\r\nINCR\r\n$%d\r\n%s\r\n' % (len(k), k))
+        s = self._recv_line()
+        return int(s[1:])
+
+    def incrby(self, k, v):
+        if isinstance(k, str):
+            k = k.encode('utf-8')
+        v = str(v).encode('utf-8')
+        self._send(b'*3\r\n$6\r\nINCRBY\r\n$%d\r\n%s\r\n$%d\r\n%s\r\n' % (len(k), k, len(v), v))
+        s = self._recv_line()
+        return int(s[1:])
 
 def connect(host, port=6379):
     return RedisConnection(host, port)
