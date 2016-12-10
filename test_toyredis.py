@@ -31,8 +31,14 @@ class TestRedis(unittest.TestCase):
 
     def test_redis(self):
         conn = toyredis.connect(self.host)
+
         conn.set('foo', 'bar')
         self.assertEqual(conn.get('foo'), b'bar')
+
+        conn.set('kanji_character', '漢字')
+        self.assertEqual(conn.get('kanji_character'), b'\xe6\xbc\xa2\xe5\xad\x97')
+        self.assertEqual(conn.get('kanji_character').decode('utf-8'), '漢字')
+
         conn.close()
 
 if __name__ == "__main__":
