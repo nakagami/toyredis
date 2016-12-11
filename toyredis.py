@@ -39,6 +39,13 @@ class RedisConnection:
         while (n < len(b)):
             n += self._sock.send(b[n:])
 
+    def _send_command(self, params):
+        # params: sequence of bytes
+        buf = b'*%d\r\n' % (len(params),)
+        for p in params:
+            buf += b'$%d\r\n%s\r\n' % (len(p), p)
+        self._send(buf)
+
     def _recv(self, ln):
         while len(self._readbuf) < ln:
             b = self._sock.recv(ln-len(self._readbuf))
@@ -68,7 +75,8 @@ class RedisConnection:
             v = str(v)
         if isinstance(v, str):
             v = v.encode('utf-8')
-        self._send(b'*3\r\n$3\r\nSET\r\n$%d\r\n%s\r\n$%d\r\n%s\r\n' % (len(k), k, len(v), v))
+        self._send_command([b'SET', k, v])
+
         s = self._recv_line()
         if s != b'+OK':
             ValueError(s)
@@ -76,7 +84,8 @@ class RedisConnection:
     def get(self, k):
         if isinstance(k, str):
             k = k.encode('utf-8')
-        self._send(b'*2\r\n$3\r\nGET\r\n$%d\r\n%s\r\n' % (len(k), k))
+        self._send_command([b'GET', k])
+
         s = self._recv_line()
         ln = int(s[1:])
         return self._recv(ln+2)[:-2]
@@ -84,7 +93,8 @@ class RedisConnection:
     def incr(self, k):
         if isinstance(k, str):
             k = k.encode('utf-8')
-        self._send(b'*2\r\n$4\r\nINCR\r\n$%d\r\n%s\r\n' % (len(k), k))
+        self._send_command([b'INCR', k])
+
         s = self._recv_line()
         return int(s[1:])
 
@@ -92,7 +102,8 @@ class RedisConnection:
         if isinstance(k, str):
             k = k.encode('utf-8')
         v = str(v).encode('utf-8')
-        self._send(b'*3\r\n$6\r\nINCRBY\r\n$%d\r\n%s\r\n$%d\r\n%s\r\n' % (len(k), k, len(v), v))
+        self._send_command([b'INCRBY', k, v])
+
         s = self._recv_line()
         return int(s[1:])
 
