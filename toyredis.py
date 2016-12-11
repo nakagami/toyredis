@@ -55,7 +55,7 @@ class RedisConnection:
         self._readbuf = self._readbuf[ln:]
         return r
 
-    def _recv(self):
+    def recv(self):
         i = self._readbuf.find(b'\r\n')
         while i < 0:
             self._readbuf += self._sock.recv(1024)
@@ -75,7 +75,7 @@ class RedisConnection:
             return self._recv_len(ln)
         elif r[0:1] == b'*':
             ln = int(r[1:])
-            return [self._recv() for i in range(ln)]
+            return [self.recv() for i in range(ln)]
 
         raise ValueError(r)
 
@@ -90,37 +90,32 @@ class RedisConnection:
         if isinstance(v, str):
             v = v.encode('utf-8')
         self._send_command([b'SET', k, v])
-
-        assert self._recv() == b'OK'
+        assert self.recv() == b'OK'
 
     def delete(self, k):
         if isinstance(k, str):
             k = k.encode('utf-8')
         self._send_command([b'DEL', k])
-
-        return self._recv()
+        return self.recv()
 
     def get(self, k):
         if isinstance(k, str):
             k = k.encode('utf-8')
         self._send_command([b'GET', k])
-
-        return self._recv()
+        return self.recv()
 
     def incr(self, k):
         if isinstance(k, str):
             k = k.encode('utf-8')
         self._send_command([b'INCR', k])
-
-        return self._recv()
+        return self.recv()
 
     def incrby(self, k, v):
         if isinstance(k, str):
             k = k.encode('utf-8')
         v = str(v).encode('utf-8')
         self._send_command([b'INCRBY', k, v])
-
-        return self._recv()
+        return self.recv()
 
     def lpush(self, k, v):
         if isinstance(k, str):
@@ -130,8 +125,16 @@ class RedisConnection:
         if isinstance(v, str):
             v = v.encode('utf-8')
         self._send_command([b'LPUSH', k, v])
+        return self.recv()
 
-        return self._recv()
+    def subscribe(self, k, v):
+        if isinstance(k, str):
+            k = k.encode('utf-8')
+        if isinstance(v, str):
+            v = v.encode('utf-8')
+        self._send_command([b'SUBSCRIBLE', k, v])
+        return self.recv()
+
 
 
 def connect(host, port=6379):
