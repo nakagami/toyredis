@@ -8,6 +8,7 @@ Requirement
 ------------
 
 - Python 3.4+ https://www.python.org
+- MicroPython https://micropython.org
 
 Install
 ----------
