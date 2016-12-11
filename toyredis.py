@@ -21,7 +21,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 ###############################################################################
-import socket
+try:
+    import usocket as socket
+except:
+    import socket
 
 __version__ = '0.0.1'
 
@@ -29,8 +32,8 @@ class RedisConnection:
     def __init__(self, host, port):
         self.host = host
         self.port = port
-        self._sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self._sock.connect((self.host, self.port))
+        self._sock = socket.socket()
+        self._sock.connect(socket.getaddrinfo(self.host, self.port)[0][-1])
         self._readbuf = b''
 
     def recv(self):

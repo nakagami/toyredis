@@ -27,7 +27,7 @@ import unittest
 import toyredis
 
 class TestRedis(unittest.TestCase):
-    host = 'localhost'
+    host = '127.0.0.1'
 
     def test_redis(self):
         conn = toyredis.connect(self.host)
