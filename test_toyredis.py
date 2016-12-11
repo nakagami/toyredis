@@ -32,19 +32,24 @@ class TestRedis(unittest.TestCase):
     def test_redis(self):
         conn = toyredis.connect(self.host)
 
-        while conn.delete('foo') != 0:
-            pass
-
+        # GET/SET
         conn.set('foo', 'bar')
         self.assertEqual(conn.get('foo'), b'bar')
-
         conn.set('kanji_character', '漢字')
         self.assertEqual(conn.get('kanji_character'), b'\xe6\xbc\xa2\xe5\xad\x97')
         self.assertEqual(conn.get('kanji_character').decode('utf-8'), '漢字')
 
+        # INCR/INCRBY
         conn.set('int_test', 1)
         self.assertEqual(conn.incr('int_test'), 2)
         self.assertEqual(conn.incrby('int_test', 3), 5)
+
+        # List
+        while conn.delete('list_test') != 0:
+            pass
+        self.assertEqual(conn.lpush('list_test', 'foo'), 1)
+        self.assertEqual(conn.lpush('list_test', 'bar'), 2)
+        self.assertEqual(conn.lpush('list_test', 'baz'), 3)
 
         conn.close()
 

@@ -118,5 +118,17 @@ class RedisConnection:
 
         return self._recv()
 
+    def lpush(self, k, v):
+        if isinstance(k, str):
+            k = k.encode('utf-8')
+        if isinstance(v, int):
+            v = str(v)
+        if isinstance(v, str):
+            v = v.encode('utf-8')
+        self._send_command([b'LPUSH', k, v])
+
+        return self._recv()
+
+
 def connect(host, port=6379):
     return RedisConnection(host, port)
