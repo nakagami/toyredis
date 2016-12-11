@@ -32,6 +32,9 @@ class TestRedis(unittest.TestCase):
     def test_redis(self):
         conn = toyredis.connect(self.host)
 
+        while conn.delete('foo') != 0:
+            pass
+
         conn.set('foo', 'bar')
         self.assertEqual(conn.get('foo'), b'bar')
 
