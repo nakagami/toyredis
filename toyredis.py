@@ -86,47 +86,24 @@ class RedisConnection:
         self._sock.close()
 
     def set(self, k, v):
-        if isinstance(k, str):
-            k = k.encode('utf-8')
-        if isinstance(v, int):
-            v = str(v)
-        if isinstance(v, str):
-            v = v.encode('utf-8')
         assert self.command_response([b'SET', k, v]) == b'OK'
 
     def delete(self, k):
-        if isinstance(k, str):
-            k = k.encode('utf-8')
         return self.command_response([b'DEL', k])
 
     def get(self, k):
-        if isinstance(k, str):
-            k = k.encode('utf-8')
         return self.command_response([b'GET', k])
 
     def incr(self, k):
-        if isinstance(k, str):
-            k = k.encode('utf-8')
         return self.command_response([b'INCR', k])
 
     def incrby(self, k, v):
-        if isinstance(k, str):
-            k = k.encode('utf-8')
-        v = str(v).encode('utf-8')
         return self.command_response([b'INCRBY', k, v])
 
     def lpush(self, k, v):
-        if isinstance(k, str):
-            k = k.encode('utf-8')
-        if isinstance(v, int):
-            v = str(v)
-        if isinstance(v, str):
-            v = v.encode('utf-8')
         return self.command_response([b'LPUSH', k, v])
 
     def subscribe(self, k):
-        if isinstance(k, str):
-            k = k.encode('utf-8')
         self.command_response([b'SUBSCRIBE', k])
 
 
