@@ -73,6 +73,10 @@ class RedisConnection:
             if ln == -1:
                 return None
             return self._recv_len(ln)
+        elif r[0:1] == b'*':
+            ln = int(r[1:])
+            return [self._recv() for i in range(ln)]
+
         raise ValueError(r)
 
     def close(self):
