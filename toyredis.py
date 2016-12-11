@@ -21,7 +21,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 ###############################################################################
-import sys
 import socket
 
 __version__ = '0.0.1'
@@ -33,9 +32,6 @@ class RedisConnection:
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._sock.connect((self.host, self.port))
         self._readbuf = b''
-
-    def _recv_len(self, ln):
-        return r
 
     def recv(self):
         i = self._readbuf.find(b'\r\n')
@@ -67,7 +63,6 @@ class RedisConnection:
         elif r[0:1] == b'*':
             ln = int(r[1:])
             return [self.recv() for i in range(ln)]
-
         raise ValueError(r)
 
     def command_response(self, params):
