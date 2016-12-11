@@ -34,25 +34,7 @@ class RedisConnection:
         self._sock.connect((self.host, self.port))
         self._readbuf = b''
 
-    def _send_command(self, params):
-        # params: sequence of bytes
-        buf = b'*%d\r\n' % (len(params),)
-        for p in params:
-            buf += b'$%d\r\n%s\r\n' % (len(p), p)
-        n = 0
-        while (n < len(buf)):
-            n += self._sock.send(buf[n:])
-
     def _recv_len(self, ln):
-        ln += 2     # read with terminator b'\r\n'
-        while len(self._readbuf) < ln:
-            b = self._sock.recv(ln-len(self._readbuf))
-            if not b:
-                raise socket.error("Can't recv packets")
-            self._readbuf += b
-        r = self._readbuf[:ln-2]
-        assert self._readbuf[ln-2:ln] == b'\r\n'
-        self._readbuf = self._readbuf[ln:]
         return r
 
     def recv(self):
@@ -72,12 +54,33 @@ class RedisConnection:
             ln = int(r[1:])
             if ln == -1:
                 return None
-            return self._recv_len(ln)
+            ln += 2     # read with terminator b'\r\n'
+            while len(self._readbuf) < ln:
+                b = self._sock.recv(ln-len(self._readbuf))
+                if not b:
+                    raise socket.error("Can't recv packets")
+                self._readbuf += b
+            r = self._readbuf[:ln-2]
+            assert self._readbuf[ln-2:ln] == b'\r\n'
+            self._readbuf = self._readbuf[ln:]
+            return r
         elif r[0:1] == b'*':
             ln = int(r[1:])
             return [self.recv() for i in range(ln)]
 
         raise ValueError(r)
+
+    def command_response(self, params):
+        for i in range(len(params)):
+            if not isinstance(params[i], bytes):
+                params[i] = str(params[i]).encode('utf-8')
+        buf = b'*%d\r\n' % (len(params),)
+        for p in params:
+            buf += b'$%d\r\n%s\r\n' % (len(p), p)
+        n = 0
+        while (n < len(buf)):
+            n += self._sock.send(buf[n:])
+        return self.recv()
 
     def close(self):
         self._sock.close()
@@ -89,33 +92,28 @@ class RedisConnection:
             v = str(v)
         if isinstance(v, str):
             v = v.encode('utf-8')
-        self._send_command([b'SET', k, v])
-        assert self.recv() == b'OK'
+        assert self.command_response([b'SET', k, v]) == b'OK'
 
     def delete(self, k):
         if isinstance(k, str):
             k = k.encode('utf-8')
-        self._send_command([b'DEL', k])
-        return self.recv()
+        return self.command_response([b'DEL', k])
 
     def get(self, k):
         if isinstance(k, str):
             k = k.encode('utf-8')
-        self._send_command([b'GET', k])
-        return self.recv()
+        return self.command_response([b'GET', k])
 
     def incr(self, k):
         if isinstance(k, str):
             k = k.encode('utf-8')
-        self._send_command([b'INCR', k])
-        return self.recv()
+        return self.command_response([b'INCR', k])
 
     def incrby(self, k, v):
         if isinstance(k, str):
             k = k.encode('utf-8')
         v = str(v).encode('utf-8')
-        self._send_command([b'INCRBY', k, v])
-        return self.recv()
+        return self.command_response([b'INCRBY', k, v])
 
     def lpush(self, k, v):
         if isinstance(k, str):
@@ -124,17 +122,12 @@ class RedisConnection:
             v = str(v)
         if isinstance(v, str):
             v = v.encode('utf-8')
-        self._send_command([b'LPUSH', k, v])
-        return self.recv()
+        return self.command_response([b'LPUSH', k, v])
 
-    def subscribe(self, k, v):
+    def subscribe(self, k):
         if isinstance(k, str):
             k = k.encode('utf-8')
-        if isinstance(v, str):
-            v = v.encode('utf-8')
-        self._send_command([b'SUBSCRIBLE', k, v])
-        return self.recv()
-
+        self.command_response([b'SUBSCRIBE', k])
 
 
 def connect(host, port=6379):
