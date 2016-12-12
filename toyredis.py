@@ -86,6 +86,15 @@ class RedisConnection:
     def set(self, k, v):
         assert self.command_response([b'SET', k, v]) == b'OK'
 
+    def psetex(self, k, timeout, v):
+        return self.command_response([b'PSETEX', k, timeout, v])
+
+    def setex(self, k, timeout, v):
+        return self.command_response([b'SETEX', k, timeout, v])
+
+    def ttl(self, k):
+        return self.command_response([b'TTL', k])
+
     def setnx(self, k, v):
         return self.command_response([b'SETNX', k, v])
 

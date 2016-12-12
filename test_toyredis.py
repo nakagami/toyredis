@@ -35,6 +35,7 @@ class TestRedis(unittest.TestCase):
         # GET/SET/SETNX
         while conn.delete('foo') != 0:
             pass
+        self.assertEqual(conn.get('foo'), None)
         self.assertEqual(conn.setnx('foo', 'bar'), 1)
         self.assertEqual(conn.get('foo'), b'bar')
         conn.set('foo', 'baz')
@@ -44,6 +45,13 @@ class TestRedis(unittest.TestCase):
         conn.set('kanji_character', '漢字')
         self.assertEqual(conn.get('kanji_character'), b'\xe6\xbc\xa2\xe5\xad\x97')
         self.assertEqual(conn.get('kanji_character').decode('utf-8'), '漢字')
+
+        # SETEX/PSETEX
+        conn.psetex('psetex_test', 1, "psetex")
+        conn.setex('setex_test', 10, "setex")
+        self.assertTrue(conn.ttl('setex_test') > 0)
+        self.assertEqual(conn.ttl('psetex_test'), 0)
+
 
         # INCR/INCRBY
         conn.set('int_test', 1)
