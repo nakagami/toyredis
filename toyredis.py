@@ -86,6 +86,9 @@ class RedisConnection:
     def set(self, k, v):
         assert self.command_response([b'SET', k, v]) == b'OK'
 
+    def setnx(self, k, v):
+        return self.command_response([b'SETNX', k, v])
+
     def delete(self, k):
         return self.command_response([b'DEL', k])
 
