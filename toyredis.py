@@ -86,6 +86,9 @@ class RedisConnection:
     def set(self, k, v):
         assert self.command_response([b'SET', k, v]) == b'OK'
 
+    def mset(self, k, values):
+        return self.command_response([b'MSET', k] + values)
+
     def psetex(self, k, timeout, v):
         return self.command_response([b'PSETEX', k, timeout, v])
 
@@ -97,6 +100,9 @@ class RedisConnection:
 
     def setnx(self, k, v):
         return self.command_response([b'SETNX', k, v])
+
+    def msetnx(self, k, values):
+        return self.command_response([b'MSETNX', k] + values)
 
     def delete(self, k):
         return self.command_response([b'DEL', k])
