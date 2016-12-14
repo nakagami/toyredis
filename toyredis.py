@@ -110,6 +110,9 @@ class RedisConnection:
     def get(self, k):
         return self.command_response([b'GET', k])
 
+    def getset(self, k, v):
+        return self.command_response([b'GETSET', k, v])
+
     def incr(self, k):
         return self.command_response([b'INCR', k])
 
