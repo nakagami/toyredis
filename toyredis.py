@@ -146,18 +146,24 @@ class RedisConnection:
     def decrby(self, k, v):
         return self.command([b'DECRBY', k, v])
 
-    # TODO: append
-    # TODO: substr
+    def append(self, k, v):
+        return self.command([b'APPEND', k, v])
+
+    def substr(self, k, start, end):
+        return self.command([b'SUBSTR', k, start, end])
 
 
     # Commands for list
 
-    # TODO: rpush
+    def rpush(self, k, v):
+        return self.command([b'RPUSH', k, v])
 
     def lpush(self, k, v):
         return self.command([b'LPUSH', k, v])
 
-    # TODO: llen
+    def llen(self, k):
+        return self.command([b'LLEN', k])
+
     # TODO: lrange
     # TODO: ltrim
     # TODO: lindex

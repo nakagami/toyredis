@@ -56,9 +56,13 @@ class TestRedis(unittest.TestCase):
         self.assertEqual(conn.get('foo'), b'baz')
         self.assertEqual(conn.setnx('foo', 'bar'), 0)
         self.assertEqual(conn.get('foo'), b'baz')
+        conn.append('foo', '123')
+        self.assertEqual(conn.substr('foo', 1, 4), b'az12')
+
         conn.set('kanji_character', '漢字')
         self.assertEqual(conn.get('kanji_character'), b'\xe6\xbc\xa2\xe5\xad\x97')
         self.assertEqual(conn.get('kanji_character').decode('utf-8'), '漢字')
+
 
         # SETEX/PSETEX
         conn.psetex('psetex_test', 1, "psetex")
@@ -85,10 +89,17 @@ class TestRedis(unittest.TestCase):
 
         # List
         conn.flushdb()
-        self.assertEqual(conn.lpush('list_test', 10), 1)
-        self.assertEqual(conn.lpush('list_test', 100), 2)
-        self.assertEqual(conn.lpush('list_test', 1), 3)
-        self.assertEqual(conn.command('SORT list_test DESC'), [b'100', b'10', b'1'])
+
+        self.assertEqual(conn.rpush('list_test', 'foo'), 1)
+        self.assertEqual(conn.lpush('list_test', 'bar'), 2)
+        self.assertEqual(conn.rpush('list_test', 'baz'), 3)
+        self.assertEqual(conn.llen('list_test'), 3)
+
+        # sort
+        self.assertEqual(conn.lpush('sort_test', 10), 1)
+        self.assertEqual(conn.lpush('sort_test', 100), 2)
+        self.assertEqual(conn.lpush('sort_test', 1), 3)
+        self.assertEqual(conn.command('SORT sort_test DESC'), [b'100', b'10', b'1'])
 
         conn.close()
 
