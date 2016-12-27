@@ -21,6 +21,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 ###############################################################################
+import sys
 try:
     import usocket as socket
 except:
@@ -33,7 +34,10 @@ class RedisConnection:
         self.host = host
         self.port = port
         self._sock = socket.socket()
-        self._sock.connect(socket.getaddrinfo(self.host, self.port)[0][-1])
+        if sys.implementation.name == 'micropython':
+            self._sock.connect(socket.getaddrinfo(self.host, self.port)[0][-1])
+        else:
+            self._sock.connect((self.host, self.port))
         self._readbuf = b''
 
     def recv(self):
