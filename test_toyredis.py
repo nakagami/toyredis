@@ -32,8 +32,12 @@ class TestRedis(unittest.TestCase):
     def test_type_independent(self):
         conn = toyredis.connect(self.host)
 
+        # EXISTS
         while conn.delete('foo') != 0:
             pass
+        self.assertEqual(conn.exists('foo'), False)
+        conn.set('foo', 'bar')
+        self.assertEqual(conn.exists('foo'), True)
 
         conn.close()
 

@@ -87,6 +87,8 @@ class RedisConnection:
     # http://redis.shibu.jp/commandreference/
 
     # Type independent commands
+    def exists(self, k):
+        return self.command_response([b'EXISTS', k]) == 1
 
     def delete(self, k):
         return self.command_response([b'DEL', k])
