@@ -110,7 +110,8 @@ class RedisConnection:
     def getset(self, k, v):
         return self.command_response([b'GETSET', k, v])
 
-    # TODO: mget
+    def mget(self, *ks):
+        return self.command_response([b'MGET'] + list(ks))
 
     def setnx(self, k, v):
         return self.command_response([b'SETNX', k, v])
@@ -121,8 +122,12 @@ class RedisConnection:
     def psetex(self, k, milliseconds, v):
         return self.command_response([b'PSETEX', k, milliseconds, v])
 
-    def mset(self, k, values):
-        return self.command_response([b'MSET', k] + values)
+    def mset(self, d):
+        assert isinstance(d, dict)
+        c = [b'MSET']
+        for k, v in d.items():
+            c.extend([k, v])
+        assert self.command_response(c) == b'OK'
 
     def msetnx(self, k, values):
         return self.command_response([b'MSETNX', k] + values)

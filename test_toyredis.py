@@ -66,6 +66,10 @@ class TestRedis(unittest.TestCase):
         self.assertTrue(conn.ttl('setex_test') > 0)
         self.assertEqual(conn.ttl('psetex_test'), 0)
 
+        # MSET/MGET
+        conn.mset({'mkey1': 'value1', 'mkey2': 'value2'})
+        self.assertEqual(conn.mget('mkey1', 'mkey2'), [b'value1', b'value2'])
+
 
         # INCR/INCRBY
         conn.set('int_test', 1)
