@@ -83,9 +83,10 @@ class TestRedis(unittest.TestCase):
 
         # List
         conn.flushdb()
-        self.assertEqual(conn.lpush('list_test', 'foo'), 1)
-        self.assertEqual(conn.lpush('list_test', 'bar'), 2)
-        self.assertEqual(conn.lpush('list_test', 'baz'), 3)
+        self.assertEqual(conn.lpush('list_test', 10), 1)
+        self.assertEqual(conn.lpush('list_test', 100), 2)
+        self.assertEqual(conn.lpush('list_test', 1), 3)
+        self.assertEqual(conn.command('SORT list_test DESC'), [b'100', b'10', b'1'])
 
         conn.close()
 

@@ -46,7 +46,7 @@ class RedisConnection:
         if r[0:1] == b'+':
             return r[1:]
         elif r[0:1] == b'-':
-            raise ValueError(r[1:])
+            raise ValueError(r[1:].decode('utf-8'))
         elif r[0:1] == b':':
             return int(r[1:])
         elif r[0:1] == b'$':
@@ -68,7 +68,9 @@ class RedisConnection:
             return [self.recv() for i in range(ln)]
         raise ValueError(r)
 
-    def command_response(self, params):
+    def command(self, params):
+        if isinstance(params, str):
+            params = params.split()
         for i in range(len(params)):
             if not isinstance(params[i], bytes):
                 params[i] = str(params[i]).encode('utf-8')
@@ -88,55 +90,55 @@ class RedisConnection:
 
     # Type independent commands
     def exists(self, k):
-        return self.command_response([b'EXISTS', k]) == 1
+        return self.command([b'EXISTS', k]) == 1
 
     def delete(self, k):
-        return self.command_response([b'DEL', k])
+        return self.command([b'DEL', k])
 
     def ttl(self, k):
-        return self.command_response([b'TTL', k])
+        return self.command([b'TTL', k])
 
     def flushdb(self):
-        assert self.command_response([b'FLUSHDB']) == b'OK'
+        assert self.command([b'FLUSHDB']) == b'OK'
 
     # Commands for string
 
     def set(self, k, v):
-        assert self.command_response([b'SET', k, v]) == b'OK'
+        assert self.command([b'SET', k, v]) == b'OK'
 
     def get(self, k):
-        return self.command_response([b'GET', k])
+        return self.command([b'GET', k])
 
     def getset(self, k, v):
-        return self.command_response([b'GETSET', k, v])
+        return self.command([b'GETSET', k, v])
 
     def mget(self, *ks):
-        return self.command_response([b'MGET'] + list(ks))
+        return self.command([b'MGET'] + list(ks))
 
     def setnx(self, k, v):
-        return self.command_response([b'SETNX', k, v])
+        return self.command([b'SETNX', k, v])
 
     def setex(self, k, seconds, v):
-        return self.command_response([b'SETEX', k, seconds, v])
+        return self.command([b'SETEX', k, seconds, v])
 
     def psetex(self, k, milliseconds, v):
-        return self.command_response([b'PSETEX', k, milliseconds, v])
+        return self.command([b'PSETEX', k, milliseconds, v])
 
     def mset(self, d):
         assert isinstance(d, dict)
         c = [b'MSET']
         for k, v in d.items():
             c.extend([k, v])
-        assert self.command_response(c) == b'OK'
+        assert self.command(c) == b'OK'
 
     def msetnx(self, k, values):
-        return self.command_response([b'MSETNX', k] + values)
+        return self.command([b'MSETNX', k] + values)
 
     def incr(self, k):
-        return self.command_response([b'INCR', k])
+        return self.command([b'INCR', k])
 
     def incrby(self, k, v):
-        return self.command_response([b'INCRBY', k, v])
+        return self.command([b'INCRBY', k, v])
 
     # TODO: decr
     # TODO: decrby
@@ -147,7 +149,7 @@ class RedisConnection:
     # Commands for list
 
     def lpush(self, k, v):
-        return self.command_response([b'LPUSH', k, v])
+        return self.command([b'LPUSH', k, v])
 
 
     # Commands for set
@@ -162,7 +164,7 @@ class RedisConnection:
     # Publish/Subscribe
 
     def subscribe(self, k):
-        self.command_response([b'SUBSCRIBE', k])
+        self.command([b'SUBSCRIBE', k])
 
 
 def connect(host, port=6379):
