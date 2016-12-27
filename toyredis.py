@@ -83,29 +83,21 @@ class RedisConnection:
     def close(self):
         self._sock.close()
 
-    def set(self, k, v):
-        assert self.command_response([b'SET', k, v]) == b'OK'
 
-    def mset(self, k, values):
-        return self.command_response([b'MSET', k] + values)
+    # http://redis.shibu.jp/commandreference/
 
-    def psetex(self, k, timeout, v):
-        return self.command_response([b'PSETEX', k, timeout, v])
+    # Type independent commands
 
-    def setex(self, k, timeout, v):
-        return self.command_response([b'SETEX', k, timeout, v])
+    def delete(self, k):
+        return self.command_response([b'DEL', k])
 
     def ttl(self, k):
         return self.command_response([b'TTL', k])
 
-    def setnx(self, k, v):
-        return self.command_response([b'SETNX', k, v])
+    # Commands for string
 
-    def msetnx(self, k, values):
-        return self.command_response([b'MSETNX', k] + values)
-
-    def delete(self, k):
-        return self.command_response([b'DEL', k])
+    def set(self, k, v):
+        assert self.command_response([b'SET', k, v]) == b'OK'
 
     def get(self, k):
         return self.command_response([b'GET', k])
@@ -113,14 +105,51 @@ class RedisConnection:
     def getset(self, k, v):
         return self.command_response([b'GETSET', k, v])
 
+    # TODO: mget
+
+    def setnx(self, k, v):
+        return self.command_response([b'SETNX', k, v])
+
+    def setex(self, k, seconds, v):
+        return self.command_response([b'SETEX', k, seconds, v])
+
+    def psetex(self, k, milliseconds, v):
+        return self.command_response([b'PSETEX', k, milliseconds, v])
+
+    def mset(self, k, values):
+        return self.command_response([b'MSET', k] + values)
+
+    def msetnx(self, k, values):
+        return self.command_response([b'MSETNX', k] + values)
+
     def incr(self, k):
         return self.command_response([b'INCR', k])
 
     def incrby(self, k, v):
         return self.command_response([b'INCRBY', k, v])
 
+    # TODO: decr
+    # TODO: decrby
+    # TODO: append
+    # TODO: substr
+
+
+    # Commands for list
+
     def lpush(self, k, v):
         return self.command_response([b'LPUSH', k, v])
+
+
+    # Commands for set
+
+
+    # Commands for sorted set
+
+    # Commands for hash
+
+    # Sort
+
+    # Publish/Subscribe
 
     def subscribe(self, k):
         self.command_response([b'SUBSCRIBE', k])

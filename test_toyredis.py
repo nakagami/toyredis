@@ -29,7 +29,15 @@ import toyredis
 class TestRedis(unittest.TestCase):
     host = '127.0.0.1'
 
-    def test_redis(self):
+    def test_type_independent(self):
+        conn = toyredis.connect(self.host)
+
+        while conn.delete('foo') != 0:
+            pass
+
+        conn.close()
+
+    def test_string(self):
         conn = toyredis.connect(self.host)
 
         # GETSET/GET/SET/SETNX
@@ -61,6 +69,11 @@ class TestRedis(unittest.TestCase):
         conn.set('int_test', 1)
         self.assertEqual(conn.incr('int_test'), 2)
         self.assertEqual(conn.incrby('int_test', 3), 5)
+
+        conn.close()
+
+    def test_list(self):
+        conn = toyredis.connect(self.host)
 
         # List
         while conn.delete('list_test') != 0:
