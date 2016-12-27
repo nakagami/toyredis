@@ -63,6 +63,9 @@ class TestRedis(unittest.TestCase):
         self.assertEqual(conn.get('kanji_character'), b'\xe6\xbc\xa2\xe5\xad\x97')
         self.assertEqual(conn.get('kanji_character').decode('utf-8'), '漢字')
 
+        b = b'012\x00\x01\x02'
+        conn.set('binary_data', b)
+        self.assertEqual(conn.get('binary_data'), b)
 
         # SETEX/PSETEX
         conn.psetex('psetex_test', 1, "psetex")
