@@ -75,6 +75,8 @@ class TestRedis(unittest.TestCase):
         conn.set('int_test', 1)
         self.assertEqual(conn.incr('int_test'), 2)
         self.assertEqual(conn.incrby('int_test', 3), 5)
+        self.assertEqual(conn.decr('int_test'), 4)
+        self.assertEqual(conn.decrby('int_test', 2), 2)
 
         conn.close()
 

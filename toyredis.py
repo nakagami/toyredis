@@ -140,8 +140,12 @@ class RedisConnection:
     def incrby(self, k, v):
         return self.command([b'INCRBY', k, v])
 
-    # TODO: decr
-    # TODO: decrby
+    def decr(self, k):
+        return self.command([b'DECR', k])
+
+    def decrby(self, k, v):
+        return self.command([b'DECRBY', k, v])
+
     # TODO: append
     # TODO: substr
 
