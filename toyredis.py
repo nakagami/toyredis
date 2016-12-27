@@ -27,7 +27,7 @@ try:
 except:
     import socket
 
-__version__ = '0.0.1'
+__version__ = '0.0.2'
 
 class RedisConnection:
     def __init__(self, host, port):
