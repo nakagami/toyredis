@@ -148,18 +148,74 @@ class RedisConnection:
 
     # Commands for list
 
+    # TODO: rpush
+
     def lpush(self, k, v):
         return self.command([b'LPUSH', k, v])
 
+    # TODO: llen
+    # TODO: lrange
+    # TODO: ltrim
+    # TODO: lindex
+    # TODO: lset
+    # TODO: lrem
+    # TODO: lpop
+    # TODO: rpop
+    # TODO: blpop
+    # TODO: brpop
+    # TODO: droplpush
 
     # Commands for set
+
+    # TODO: sadd
+    # TODO: srem
+    # TODO: spop
+    # TODO: smove
+    # TODO: scard
+    # TODO: sismember
+    # TODO: sinter
+    # TODO: sinterstore
+    # TODO: sunion
+    # TODO: sunionstore
+    # TODO: sdiff
+    # TODO: sdiffstore
+    # TODO: smembers
+    # TODO: srandmember
 
 
     # Commands for sorted set
 
+    # TODO: zadd
+    # TODO: zrem
+    # TODO: zincrby
+    # TODO: zrank
+    # TODO: zrevrank
+    # TODO: zrange
+    # TODO: zrevrange
+    # TODO: zrangebyscore
+    # TODO: zcount
+    # TODO: zcard
+    # TODO: zscope
+    # TODO: zremrangebyrank
+    # TODO: zremrangebyscore
+    # TODO: zunionstore
+    # TODO: zinterstore
+
+
     # Commands for hash
 
-    # Sort
+    # TODO: hset
+    # TODO: hget
+    # TODO: hmget
+    # TODO: hmset
+    # TODO: hincrby
+    # TODO: hexists
+    # TODO: hdel
+    # TODO: hlen
+    # TODO: hkeys
+    # TODO: hvals
+    # TODO: hgetall
+
 
     # Publish/Subscribe
 
