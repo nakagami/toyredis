@@ -96,6 +96,9 @@ class RedisConnection:
     def ttl(self, k):
         return self.command_response([b'TTL', k])
 
+    def flushdb(self):
+        assert self.command_response([b'FLUSHDB']) == b'OK'
+
     # Commands for string
 
     def set(self, k, v):

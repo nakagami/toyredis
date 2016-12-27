@@ -33,8 +33,7 @@ class TestRedis(unittest.TestCase):
         conn = toyredis.connect(self.host)
 
         # EXISTS
-        while conn.delete('foo') != 0:
-            pass
+        conn.flushdb()
         self.assertEqual(conn.exists('foo'), False)
         conn.set('foo', 'bar')
         self.assertEqual(conn.exists('foo'), True)
@@ -45,8 +44,7 @@ class TestRedis(unittest.TestCase):
         conn = toyredis.connect(self.host)
 
         # GETSET/GET/SET/SETNX
-        while conn.delete('foo') != 0:
-            pass
+        conn.flushdb()
         self.assertEqual(conn.getset('foo', 'bar'), None)
         self.assertEqual(conn.getset('foo', 'baz'), b'bar')
         conn.delete('foo')
@@ -80,8 +78,7 @@ class TestRedis(unittest.TestCase):
         conn = toyredis.connect(self.host)
 
         # List
-        while conn.delete('list_test') != 0:
-            pass
+        conn.flushdb()
         self.assertEqual(conn.lpush('list_test', 'foo'), 1)
         self.assertEqual(conn.lpush('list_test', 'bar'), 2)
         self.assertEqual(conn.lpush('list_test', 'baz'), 3)
