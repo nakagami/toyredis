@@ -2,13 +2,12 @@
 toyredis
 ==========
 
-Toy redis client
+Toy redis client for python.
 
 Requirement
 ------------
 
-- Python 3.5+ https://www.python.org
-- MicroPython https://micropython.org
+Python 3.5+ or MicroPython https://micropython.org
 
 Install
 ----------
