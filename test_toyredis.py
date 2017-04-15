@@ -123,8 +123,17 @@ class TestRedis(unittest.TestCase):
 
         conn.close()
 
-    def test_sorted_test(self):
-        pass
+    def test_sorted_set_test(self):
+        conn = toyredis.connect(self.host)
+        # Sorted Set
+        conn.flushdb()
+        conn.zadd('set_test', 2, 'foo')
+        conn.zadd('set_test', 1, 'bar')
+        conn.zrem('set_test', 'bar')
+        with self.assertRaises(ValueError):
+            conn.zrem('set_test', 'bar')
+
+        conn.close()
 
     def test_hash(self):
         pass
