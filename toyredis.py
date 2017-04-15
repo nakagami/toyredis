@@ -237,8 +237,12 @@ class RedisConnection:
 
     # Commands for hash
 
-    # TODO: hset
-    # TODO: hget
+    def hset(self, k, f, v):
+        return self.command([b'HSET', k, f, v])
+
+    def hget(self, k, f):
+        return self.command([b'HGET', k, f])
+
     # TODO: hmget
     # TODO: hmset
     # TODO: hincrby

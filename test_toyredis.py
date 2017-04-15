@@ -136,7 +136,15 @@ class TestRedis(unittest.TestCase):
         conn.close()
 
     def test_hash(self):
-        pass
+        conn = toyredis.connect(self.host)
+        # Hash
+        conn.flushdb()
+        conn.hset('hash_test1', 'foo', 'FOO')
+        conn.hset('hash_test1', 'bar', 'BAR')
+        conn.hset('hash_test2', 'foo', 'Foo')
+        conn.hset('hash_test2', 'bar', 'Bar')
+        self.assertEqual(conn.hget('hash_test1', 'foo'), b'FOO')
+        self.assertEqual(conn.hget('hash_test2', 'bar'), b'Bar')
 
 if __name__ == "__main__":
     unittest.main()
