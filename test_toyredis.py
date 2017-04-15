@@ -97,6 +97,9 @@ class TestRedis(unittest.TestCase):
         self.assertEqual(conn.lpush('list_test', 'bar'), 2)
         self.assertEqual(conn.rpush('list_test', 'baz'), 3)
         self.assertEqual(conn.llen('list_test'), 3)
+        self.assertEqual(conn.lrange('list_test', 1, 2), [b'foo', b'baz'])
+        conn.ltrim('list_test', 1, 2)
+        self.assertEqual(conn.lrange('list_test', 0, 1), [b'foo', b'baz'])
 
         # sort
         self.assertEqual(conn.lpush('sort_test', 10), 1)
@@ -107,7 +110,18 @@ class TestRedis(unittest.TestCase):
         conn.close()
 
     def test_set(self):
-        pass
+        conn = toyredis.connect(self.host)
+        # Set
+        conn.flushdb()
+        conn.sadd('set_test', 'foo')
+        conn.sadd('set_test', 'bar')
+        conn.srem('set_test', 'bar')
+        with self.assertRaises(ValueError):
+            conn.srem('set_test', 'bar')
+        self.assertEqual(conn.spop('set_test'), b'foo')
+        self.assertEqual(conn.spop('set_test'), None)
+
+        conn.close()
 
     def test_sorted_test(self):
         pass

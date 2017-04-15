@@ -168,8 +168,13 @@ class RedisConnection:
     def llen(self, k):
         return self.command([b'LLEN', k])
 
-    # TODO: lrange
-    # TODO: ltrim
+    def lrange(self, k, start, end):
+        return self.command([b'LRANGE', k, start, end])
+
+    def ltrim(self, k, start, end):
+        return self.command([b'LTRIM', k, start, end])
+
+
     # TODO: lindex
     # TODO: lset
     # TODO: lrem
@@ -181,9 +186,17 @@ class RedisConnection:
 
     # Commands for set
 
-    # TODO: sadd
-    # TODO: srem
-    # TODO: spop
+    def sadd(self, k, v):
+        return self.command([b'SADD', k, v])
+
+    def srem(self, k, v):
+        r = self.command([b'SREM', k, v])
+        if r == 0:
+            raise ValueError('value not found')
+
+    def spop(self, k):
+        return self.command([b'SPOP', k])
+
     # TODO: smove
     # TODO: scard
     # TODO: sismember
