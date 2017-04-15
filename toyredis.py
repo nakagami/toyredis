@@ -40,7 +40,7 @@ class RedisConnection:
             self._sock.connect((self.host, self.port))
         self._readbuf = b''
 
-    def recv(self):
+    def recv_response(self):
         i = self._readbuf.find(b'\r\n')
         while i < 0:
             self._readbuf += self._sock.recv(1024)
@@ -84,7 +84,7 @@ class RedisConnection:
         n = 0
         while (n < len(buf)):
             n += self._sock.send(buf[n:])
-        return self.recv()
+        return self.recv_response()
 
     def close(self):
         self._sock.close()
