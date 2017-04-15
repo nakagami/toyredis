@@ -106,5 +106,14 @@ class TestRedis(unittest.TestCase):
 
         conn.close()
 
+    def test_set(self):
+        pass
+
+    def test_sorted_test(self):
+        pass
+
+    def test_hash(self):
+        pass
+
 if __name__ == "__main__":
     unittest.main()
