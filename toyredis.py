@@ -49,7 +49,7 @@ class RedisConnection:
         r = self._readbuf[:i]
         self._readbuf = self._readbuf[i+2:]
         if r[0:1] == b'+':
-            return r[1:]
+            return r[1:].decode(self.encoding)
         elif r[0:1] == b'-':
             raise ValueError(r[1:].decode(self.encoding))
         elif r[0:1] == b':':
@@ -67,7 +67,7 @@ class RedisConnection:
             r = self._readbuf[:ln-2]
             assert self._readbuf[ln-2:ln] == b'\r\n'
             self._readbuf = self._readbuf[ln:]
-            return r
+            return r.decode(self.encoding)
         elif r[0:1] == b'*':
             ln = int(r[1:])
             return [self.recv_response() for i in range(ln)]
@@ -104,12 +104,12 @@ class RedisConnection:
         return self.command([b'TTL', k])
 
     def flushdb(self):
-        assert self.command([b'FLUSHDB']) == b'OK'
+        assert self.command([b'FLUSHDB']) == 'OK'
 
     # Commands for string
 
     def set(self, k, v):
-        assert self.command([b'SET', k, v]) == b'OK'
+        assert self.command([b'SET', k, v]) == 'OK'
 
     def get(self, k):
         return self.command([b'GET', k])
@@ -134,7 +134,7 @@ class RedisConnection:
         c = [b'MSET']
         for k, v in d.items():
             c.extend([k, v])
-        assert self.command(c) == b'OK'
+        assert self.command(c) == 'OK'
 
     def msetnx(self, k, values):
         return self.command([b'MSETNX', k] + values)
@@ -252,7 +252,7 @@ class RedisConnection:
         c = [b'HMSET', k]
         for dk, dv in d.items():
             c.extend([dk, dv])
-        assert self.command(c) == b'OK'
+        assert self.command(c) == 'OK'
 
     def hincrby(self, k, f, v):
         return self.command([b'HINCRBY', k, f, v])
