@@ -49,9 +49,12 @@ class RedisConnection:
         r = self._readbuf[:i]
         self._readbuf = self._readbuf[i+2:]
         if r[0:1] == b'+':
-            return r[1:].decode(self.encoding)
+            v = r[1:]
+            if self.encoding:
+                v = v.decode(self.encoding)
+            return v
         elif r[0:1] == b'-':
-            raise ValueError(r[1:].decode(self.encoding))
+            raise ValueError(r[1:].decode('utf-8'))
         elif r[0:1] == b':':
             return int(r[1:])
         elif r[0:1] == b'$':
@@ -67,7 +70,9 @@ class RedisConnection:
             r = self._readbuf[:ln-2]
             assert self._readbuf[ln-2:ln] == b'\r\n'
             self._readbuf = self._readbuf[ln:]
-            return r.decode(self.encoding)
+            if self.encoding:
+                r = r.decode(self.encoding)
+            return r
         elif r[0:1] == b'*':
             ln = int(r[1:])
             return [self.recv_response() for i in range(ln)]
@@ -78,7 +83,7 @@ class RedisConnection:
             params = params.split()
         for i in range(len(params)):
             if not isinstance(params[i], bytes):
-                params[i] = str(params[i]).encode(self.encoding)
+                params[i] = str(params[i]).encode(self.encoding if self.encoding else 'utf-8')
         buf = b'*%d\r\n' % (len(params),)
         for p in params:
             buf += b'$%d\r\n%s\r\n' % (len(p), p)
