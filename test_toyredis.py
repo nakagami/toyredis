@@ -145,6 +145,13 @@ class TestRedis(unittest.TestCase):
         conn.hset('hash_test2', 'bar', 'Bar')
         self.assertEqual(conn.hget('hash_test1', 'foo'), b'FOO')
         self.assertEqual(conn.hget('hash_test2', 'bar'), b'Bar')
+        conn.hmset('hash_test1', {'bar': 'bar', 'baz': 'BAZ'})
+        self.assertEqual(conn.hmget('hash_test1', 'foo', 'bar', 'baz'), [b'FOO', b'bar', b'BAZ'])
+
+        self.assertEqual(conn.hgetall('hash_test2'), {b'foo': b'Foo', b'bar': b'Bar'})
+
+        conn.close()
+
 
 if __name__ == "__main__":
     unittest.main()

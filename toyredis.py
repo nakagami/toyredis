@@ -30,9 +30,10 @@ except:
 __version__ = '0.0.2'
 
 class RedisConnection:
-    def __init__(self, host, port):
+    def __init__(self, host, port, encoding='utf-8'):
         self.host = host
         self.port = port
+        self.encoding = encoding
         self._sock = socket.socket()
         if sys.implementation.name == 'micropython':
             self._sock.connect(socket.getaddrinfo(self.host, self.port)[0][-1])
@@ -50,7 +51,7 @@ class RedisConnection:
         if r[0:1] == b'+':
             return r[1:]
         elif r[0:1] == b'-':
-            raise ValueError(r[1:].decode('utf-8'))
+            raise ValueError(r[1:].decode(self.encoding))
         elif r[0:1] == b':':
             return int(r[1:])
         elif r[0:1] == b'$':
@@ -77,7 +78,7 @@ class RedisConnection:
             params = params.split()
         for i in range(len(params)):
             if not isinstance(params[i], bytes):
-                params[i] = str(params[i]).encode('utf-8')
+                params[i] = str(params[i]).encode(self.encoding)
         buf = b'*%d\r\n' % (len(params),)
         for p in params:
             buf += b'$%d\r\n%s\r\n' % (len(p), p)
@@ -243,16 +244,29 @@ class RedisConnection:
     def hget(self, k, f):
         return self.command([b'HGET', k, f])
 
-    # TODO: hmget
-    # TODO: hmset
-    # TODO: hincrby
+    def hmget(self, k, *fs):
+        return self.command([b'HMGET', k] + list(fs))
+
+    def hmset(self, k, d):
+        assert isinstance(d, dict)
+        c = [b'HMSET', k]
+        for dk, dv in d.items():
+            c.extend([dk, dv])
+        assert self.command(c) == b'OK'
+
+    def hincrby(self, k, f, v):
+        return self.command([b'HINCRBY', k, f, v])
+
+
     # TODO: hexists
     # TODO: hdel
     # TODO: hlen
     # TODO: hkeys
     # TODO: hvals
-    # TODO: hgetall
 
+    def hgetall(self, k):
+        r = self.command([b'HGETALL', k])
+        return dict(zip(r[::2], r[1::2]))
 
     # Publish/Subscribe
 
