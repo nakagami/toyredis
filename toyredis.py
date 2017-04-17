@@ -221,15 +221,17 @@ class RedisConnection:
 
     # Commands for sorted set
 
-    def zadd(self, k, score, v):
-        return self.command([b'ZADD', k, score, v])
+    def zadd(self, k, score, m):
+        return self.command([b'ZADD', k, score, m])
 
-    def zrem(self, k, v):
-        r = self.command([b'ZREM', k, v])
+    def zrem(self, k, m):
+        r = self.command([b'ZREM', k, m])
         if r == 0:
             raise ValueError('value not found')
 
-    # TODO: zincrby
+    def zincrby(self, k, v, m):
+        return self.command([b'ZINCRBY', k, v, m])
+
     # TODO: zrank
     # TODO: zrevrank
     # TODO: zrange
