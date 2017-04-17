@@ -263,11 +263,20 @@ class RedisConnection:
         return self.command([b'HINCRBY', k, f, v])
 
 
-    # TODO: hexists
-    # TODO: hdel
-    # TODO: hlen
-    # TODO: hkeys
-    # TODO: hvals
+    def hexists(self, k, f):
+        return self.command([b'HEXISTS', k, f]) == 1
+
+    def hdel(self, k, f):
+        return self.command([b'HDEL', k, f]) == 1
+
+    def hlen(self, k):
+        return self.command([b'HLEN', k])
+
+    def hkeys(self, k):
+        return self.command([b'HKEYS', k])
+
+    def hvals(self, k):
+        return self.command([b'HVALS', k])
 
     def hgetall(self, k):
         r = self.command([b'HGETALL', k])

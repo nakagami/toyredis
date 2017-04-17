@@ -149,6 +149,17 @@ class TestRedis(unittest.TestCase):
 
         self.assertEqual(conn.hgetall('hash_test2'), {'foo': 'Foo', 'bar': 'Bar'})
 
+        self.assertEqual(conn.hexists('hash_test2', 'foo'), True)
+        self.assertEqual(conn.hexists('hash_test2', 'baz'), False)
+
+        self.assertEqual(conn.hdel('hash_test2', 'foo'), True)
+        self.assertEqual(conn.hdel('hash_test2', 'baz'), False)
+        self.assertEqual(conn.hexists('hash_test2', 'foo'), False)
+
+        self.assertEqual(conn.hlen('hash_test1'), 3)
+        self.assertEqual(conn.hkeys('hash_test1'), ['foo', 'bar', 'baz'])
+        self.assertEqual(conn.hvals('hash_test1'), ['FOO', 'bar', 'BAZ'])
+
         conn.close()
 
 
