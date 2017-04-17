@@ -99,6 +99,9 @@ class TestRedis(unittest.TestCase):
         self.assertEqual(conn.lrange('list_test', 1, 2), ['foo', 'baz'])
         conn.ltrim('list_test', 1, 2)
         self.assertEqual(conn.lrange('list_test', 0, 1), ['foo', 'baz'])
+        self.assertEqual(conn.lindex('list_test', 1), 'baz')
+        conn.lset('list_test', 1, 'BAZ')
+        self.assertEqual(conn.lindex('list_test', 1), 'BAZ')
 
         # sort
         self.assertEqual(conn.lpush('sort_test', 10), 1)

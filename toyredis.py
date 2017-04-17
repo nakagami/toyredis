@@ -180,9 +180,12 @@ class RedisConnection:
     def ltrim(self, k, start, end):
         return self.command([b'LTRIM', k, start, end])
 
+    def lindex(self, k, i):
+        return self.command([b'LINDEX', k, i])
 
-    # TODO: lindex
-    # TODO: lset
+    def lset(self, k, i, v):
+        assert self.command([b'LSET', k, i, v]) == 'OK'
+
     # TODO: lrem
     # TODO: lpop
     # TODO: rpop
