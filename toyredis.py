@@ -109,12 +109,12 @@ class RedisConnection:
         return self.command([b'TTL', k])
 
     def flushdb(self):
-        assert self.command([b'FLUSHDB']) == 'OK'
+        return self.command([b'FLUSHDB']) == 'OK'
 
     # Commands for string
 
     def set(self, k, v):
-        assert self.command([b'SET', k, v]) == 'OK'
+        return self.command([b'SET', k, v]) == 'OK'
 
     def get(self, k):
         return self.command([b'GET', k])
@@ -139,7 +139,7 @@ class RedisConnection:
         c = [b'MSET']
         for k, v in d.items():
             c.extend([k, v])
-        assert self.command(c) == 'OK'
+        return self.command(c) == 'OK'
 
     def msetnx(self, k, values):
         return self.command([b'MSETNX', k] + values)
@@ -184,7 +184,7 @@ class RedisConnection:
         return self.command([b'LINDEX', k, i])
 
     def lset(self, k, i, v):
-        assert self.command([b'LSET', k, i, v]) == 'OK'
+        return self.command([b'LSET', k, i, v]) == 'OK'
 
     # TODO: lrem
     # TODO: lpop
@@ -262,7 +262,7 @@ class RedisConnection:
         c = [b'HMSET', k]
         for dk, dv in d.items():
             c.extend([dk, dv])
-        assert self.command(c) == 'OK'
+        return self.command(c) == 'OK'
 
     def hincrby(self, k, f, v):
         return self.command([b'HINCRBY', k, f, v])
