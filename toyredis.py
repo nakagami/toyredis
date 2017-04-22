@@ -227,14 +227,29 @@ class RedisConnection:
     def sismember(self, k, v):
         return self.command([b'SISMEMBER', k, v]) == 1
 
-    # TODO: sinter
-    # TODO: sinterstore
-    # TODO: sunion
-    # TODO: sunionstore
-    # TODO: sdiff
-    # TODO: sdiffstore
-    # TODO: smembers
-    # TODO: srandmember
+    def sinter(self, *ks):
+        return self.command([b'SINTER'] + list(ks))
+
+    def sinterstore(self, dst_k, *ks):
+        return self.command([b'SINTERSTORE', dst_k] + list(ks))
+
+    def sunion(self, *ks):
+        return self.command([b'SUNION'] + list(ks))
+
+    def sunionstore(self, dst_k, *ks):
+        return self.command([b'SINTERSTORE', dst_k] + list(ks))
+
+    def sdiff(self, *ks):
+        return self.command([b'SUNION'] + list(ks))
+
+    def sdiffstore(self, dst_k, *ks):
+        return self.command([b'SINTERSTORE', dst_k] + list(ks))
+
+    def smembers(self, k):
+        return self.command([b'SMEMERS', k])
+
+    def srandmember(self, k):
+        return self.command([b'SRANDMEMBER', k])
 
 
     # Commands for sorted set
