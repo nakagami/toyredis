@@ -30,9 +30,10 @@ except:
 __version__ = '0.0.2'
 
 class RedisConnection:
-    def __init__(self, host, port):
+    def __init__(self, host, port, encoding):
         self.host = host
         self.port = port
+        self.encoding = encoding
         self._sock = socket.socket()
         if sys.implementation.name == 'micropython':
             self._sock.connect(socket.getaddrinfo(self.host, self.port)[0][-1])
@@ -40,7 +41,7 @@ class RedisConnection:
             self._sock.connect((self.host, self.port))
         self._readbuf = b''
 
-    def recv(self):
+    def recv_response(self):
         i = self._readbuf.find(b'\r\n')
         while i < 0:
             self._readbuf += self._sock.recv(1024)
@@ -48,7 +49,10 @@ class RedisConnection:
         r = self._readbuf[:i]
         self._readbuf = self._readbuf[i+2:]
         if r[0:1] == b'+':
-            return r[1:]
+            v = r[1:]
+            if self.encoding:
+                v = v.decode(self.encoding)
+            return v
         elif r[0:1] == b'-':
             raise ValueError(r[1:].decode('utf-8'))
         elif r[0:1] == b':':
@@ -66,10 +70,12 @@ class RedisConnection:
             r = self._readbuf[:ln-2]
             assert self._readbuf[ln-2:ln] == b'\r\n'
             self._readbuf = self._readbuf[ln:]
+            if self.encoding:
+                r = r.decode(self.encoding)
             return r
         elif r[0:1] == b'*':
             ln = int(r[1:])
-            return [self.recv() for i in range(ln)]
+            return [self.recv_response() for i in range(ln)]
         raise ValueError(r)
 
     def command(self, params):
@@ -77,14 +83,14 @@ class RedisConnection:
             params = params.split()
         for i in range(len(params)):
             if not isinstance(params[i], bytes):
-                params[i] = str(params[i]).encode('utf-8')
+                params[i] = str(params[i]).encode(self.encoding if self.encoding else 'utf-8')
         buf = b'*%d\r\n' % (len(params),)
         for p in params:
             buf += b'$%d\r\n%s\r\n' % (len(p), p)
         n = 0
         while (n < len(buf)):
             n += self._sock.send(buf[n:])
-        return self.recv()
+        return self.recv_response()
 
     def close(self):
         self._sock.close()
@@ -103,12 +109,12 @@ class RedisConnection:
         return self.command([b'TTL', k])
 
     def flushdb(self):
-        assert self.command([b'FLUSHDB']) == b'OK'
+        return self.command([b'FLUSHDB']) == 'OK'
 
     # Commands for string
 
     def set(self, k, v):
-        assert self.command([b'SET', k, v]) == b'OK'
+        return self.command([b'SET', k, v]) == 'OK'
 
     def get(self, k):
         return self.command([b'GET', k])
@@ -133,7 +139,7 @@ class RedisConnection:
         c = [b'MSET']
         for k, v in d.items():
             c.extend([k, v])
-        assert self.command(c) == b'OK'
+        return self.command(c) == 'OK'
 
     def msetnx(self, k, values):
         return self.command([b'MSETNX', k] + values)
@@ -168,40 +174,97 @@ class RedisConnection:
     def llen(self, k):
         return self.command([b'LLEN', k])
 
-    # TODO: lrange
-    # TODO: ltrim
-    # TODO: lindex
-    # TODO: lset
-    # TODO: lrem
-    # TODO: lpop
-    # TODO: rpop
-    # TODO: blpop
-    # TODO: brpop
-    # TODO: droplpush
+    def lrange(self, k, start, end):
+        return self.command([b'LRANGE', k, start, end])
+
+    def ltrim(self, k, start, end):
+        return self.command([b'LTRIM', k, start, end])
+
+    def lindex(self, k, i):
+        return self.command([b'LINDEX', k, i])
+
+    def lset(self, k, i, v):
+        return self.command([b'LSET', k, i, v]) == 'OK'
+
+    def lrem(self, k, i, v):
+        return self.command([b'LREM', k, i, v]) == 'OK'
+
+    def lpop(self, k):
+        return self.command([b'LPOP', k])
+
+    def rpop(self, k):
+        return self.command([b'LPOP', k])
+
+    def blpop(self, k, vs, timeout):
+        return self.command([b'BLPOP', k] + vs + [timeout])
+
+    def brpop(self, k, vs, timeout):
+        return self.command([b'BRPOP', k] + vs + [timeout])
+
+    def rpoplpush(self, src_k, dst_k):
+        return self.command([b'RPOPLPUSH', src_k, dst_k])
+
 
     # Commands for set
 
-    # TODO: sadd
-    # TODO: srem
-    # TODO: spop
-    # TODO: smove
-    # TODO: scard
-    # TODO: sismember
-    # TODO: sinter
-    # TODO: sinterstore
-    # TODO: sunion
-    # TODO: sunionstore
-    # TODO: sdiff
-    # TODO: sdiffstore
-    # TODO: smembers
-    # TODO: srandmember
+    def sadd(self, k, v):
+        return self.command([b'SADD', k, v])
+
+    def srem(self, k, v):
+        r = self.command([b'SREM', k, v])
+        if r == 0:
+            raise ValueError('value not found')
+
+    def spop(self, k):
+        return self.command([b'SPOP', k])
+
+    def smove(self, src_k, dst_k, v):
+        return self.command([b'SMOVE', src_k, dst_k, v]) == 1
+
+    def scard(self, k):
+        return self.command([b'SCARD', k])
+
+    def sismember(self, k, v):
+        return self.command([b'SISMEMBER', k, v]) == 1
+
+    def sinter(self, *ks):
+        return self.command([b'SINTER'] + list(ks))
+
+    def sinterstore(self, dst_k, *ks):
+        return self.command([b'SINTERSTORE', dst_k] + list(ks))
+
+    def sunion(self, *ks):
+        return self.command([b'SUNION'] + list(ks))
+
+    def sunionstore(self, dst_k, *ks):
+        return self.command([b'SINTERSTORE', dst_k] + list(ks))
+
+    def sdiff(self, *ks):
+        return self.command([b'SUNION'] + list(ks))
+
+    def sdiffstore(self, dst_k, *ks):
+        return self.command([b'SINTERSTORE', dst_k] + list(ks))
+
+    def smembers(self, k):
+        return self.command([b'SMEMERS', k])
+
+    def srandmember(self, k):
+        return self.command([b'SRANDMEMBER', k])
 
 
     # Commands for sorted set
 
-    # TODO: zadd
-    # TODO: zrem
-    # TODO: zincrby
+    def zadd(self, k, score, m):
+        return self.command([b'ZADD', k, score, m])
+
+    def zrem(self, k, m):
+        r = self.command([b'ZREM', k, m])
+        if r == 0:
+            raise ValueError('value not found')
+
+    def zincrby(self, k, v, m):
+        return self.command([b'ZINCRBY', k, v, m])
+
     # TODO: zrank
     # TODO: zrevrank
     # TODO: zrange
@@ -218,18 +281,44 @@ class RedisConnection:
 
     # Commands for hash
 
-    # TODO: hset
-    # TODO: hget
-    # TODO: hmget
-    # TODO: hmset
-    # TODO: hincrby
-    # TODO: hexists
-    # TODO: hdel
-    # TODO: hlen
-    # TODO: hkeys
-    # TODO: hvals
-    # TODO: hgetall
+    def hset(self, k, f, v):
+        return self.command([b'HSET', k, f, v])
 
+    def hget(self, k, f):
+        return self.command([b'HGET', k, f])
+
+    def hmget(self, k, *fs):
+        return self.command([b'HMGET', k] + list(fs))
+
+    def hmset(self, k, d):
+        assert isinstance(d, dict)
+        c = [b'HMSET', k]
+        for dk, dv in d.items():
+            c.extend([dk, dv])
+        return self.command(c) == 'OK'
+
+    def hincrby(self, k, f, v):
+        return self.command([b'HINCRBY', k, f, v])
+
+
+    def hexists(self, k, f):
+        return self.command([b'HEXISTS', k, f]) == 1
+
+    def hdel(self, k, f):
+        return self.command([b'HDEL', k, f]) == 1
+
+    def hlen(self, k):
+        return self.command([b'HLEN', k])
+
+    def hkeys(self, k):
+        return self.command([b'HKEYS', k])
+
+    def hvals(self, k):
+        return self.command([b'HVALS', k])
+
+    def hgetall(self, k):
+        r = self.command([b'HGETALL', k])
+        return dict(zip(r[::2], r[1::2]))
 
     # Publish/Subscribe
 
@@ -237,5 +326,5 @@ class RedisConnection:
         self.command([b'SUBSCRIBE', k])
 
 
-def connect(host, port=6379):
-    return RedisConnection(host, port)
+def connect(host, port=6379, encoding='utf-8'):
+    return RedisConnection(host, port, encoding=encoding)
