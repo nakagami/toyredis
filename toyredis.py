@@ -218,9 +218,15 @@ class RedisConnection:
     def spop(self, k):
         return self.command([b'SPOP', k])
 
-    # TODO: smove
-    # TODO: scard
-    # TODO: sismember
+    def smove(self, src_k, dst_k, v):
+        return self.command([b'SMOVE', src_k, dst_k, v]) == 1
+
+    def scard(self, k):
+        return self.command([b'SCARD', k])
+
+    def sismember(self, k, v):
+        return self.command([b'SISMEMBER', k, v]) == 1
+
     # TODO: sinter
     # TODO: sinterstore
     # TODO: sunion

@@ -140,6 +140,15 @@ class TestRedis(unittest.TestCase):
         self.assertEqual(conn.spop('set_test'), 'foo')
         self.assertEqual(conn.spop('set_test'), None)
 
+        conn.sadd('set_test', 'foo')
+        conn.sadd('set_test', 'bar')
+        conn.sadd('set_test', 'baz')
+        conn.smove('set_test', 'set_test2', 'foo')
+        self.assertEqual(conn.scard('set_test'), 2)
+        self.assertEqual(conn.scard('set_test2'), 1)
+        self.assertEqual(conn.sismember('set_test', 'foo'), False)
+        self.assertEqual(conn.sismember('set_test2', 'foo'), True)
+
         conn.close()
 
     def test_sorted_set_test(self):
