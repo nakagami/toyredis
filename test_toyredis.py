@@ -62,10 +62,6 @@ class TestRedis(unittest.TestCase):
         conn.set('kanji_character', '漢字')
         self.assertEqual(conn.get('kanji_character'), '漢字')
 
-        b = '012\x00\x0d\x0a\x01\x02'
-        conn.set('binary_data', b)
-        self.assertEqual(conn.get('binary_data'), b)
-
         # SETEX/PSETEX
         conn.psetex('psetex_test', 1, "psetex")
         conn.setex('setex_test', 10, "setex")
@@ -83,6 +79,16 @@ class TestRedis(unittest.TestCase):
         self.assertEqual(conn.incrby('int_test', 3), 5)
         self.assertEqual(conn.decr('int_test'), 4)
         self.assertEqual(conn.decrby('int_test', 2), 2)
+
+        conn.close()
+
+    def test_binary(self):
+        conn = toyredis.connect(self.host, encoding=None)
+
+        conn.flushdb()
+        b = b'012\x00\x0d\x0a\x01\x02'
+        conn.set('binary_data', b)
+        self.assertEqual(conn.get('binary_data'), b)
 
         conn.close()
 

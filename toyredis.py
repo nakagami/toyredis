@@ -30,7 +30,7 @@ except:
 __version__ = '0.0.2'
 
 class RedisConnection:
-    def __init__(self, host, port, encoding='utf-8'):
+    def __init__(self, host, port, encoding):
         self.host = host
         self.port = port
         self.encoding = encoding
@@ -293,5 +293,5 @@ class RedisConnection:
         self.command([b'SUBSCRIBE', k])
 
 
-def connect(host, port=6379):
-    return RedisConnection(host, port)
+def connect(host, port=6379, encoding='utf-8'):
+    return RedisConnection(host, port, encoding=encoding)
