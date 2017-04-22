@@ -186,12 +186,24 @@ class RedisConnection:
     def lset(self, k, i, v):
         return self.command([b'LSET', k, i, v]) == 'OK'
 
-    # TODO: lrem
-    # TODO: lpop
-    # TODO: rpop
-    # TODO: blpop
-    # TODO: brpop
-    # TODO: droplpush
+    def lrem(self, k, i, v):
+        return self.command([b'LREM', k, i, v]) == 'OK'
+
+    def lpop(self, k):
+        return self.command([b'LPOP', k])
+
+    def rpop(self, k):
+        return self.command([b'LPOP', k])
+
+    def blpop(self, k, vs, timeout):
+        return self.command([b'BLPOP', k] + vs + [timeout])
+
+    def brpop(self, k, vs, timeout):
+        return self.command([b'BRPOP', k] + vs + [timeout])
+
+    def rpoplpush(self, src_k, dst_k):
+        return self.command([b'RPOPLPUSH', src_k, dst_k])
+
 
     # Commands for set
 

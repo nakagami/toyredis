@@ -102,12 +102,23 @@ class TestRedis(unittest.TestCase):
         self.assertEqual(conn.lpush('list_test', 'bar'), 2)
         self.assertEqual(conn.rpush('list_test', 'baz'), 3)
         self.assertEqual(conn.llen('list_test'), 3)
+
         self.assertEqual(conn.lrange('list_test', 1, 2), ['foo', 'baz'])
         conn.ltrim('list_test', 1, 2)
         self.assertEqual(conn.lrange('list_test', 0, 1), ['foo', 'baz'])
         self.assertEqual(conn.lindex('list_test', 1), 'baz')
         conn.lset('list_test', 1, 'BAZ')
         self.assertEqual(conn.lindex('list_test', 1), 'BAZ')
+
+        self.assertEqual(conn.rpush('list_test', 'foo'), 3)
+        self.assertEqual(conn.rpush('list_test', 'bar'), 4)
+        self.assertEqual(conn.rpush('list_test', 'baz'), 5)
+        self.assertEqual(conn.llen('list_test'), 5)
+        self.assertEqual(conn.lpop('list_test'), 'foo')
+        self.assertEqual(conn.rpop('list_test'), 'BAZ')
+        self.assertEqual(conn.rpoplpush('list_test', 'list_test2'), 'baz')
+        self.assertEqual(conn.lindex('list_test2', 0), 'baz')
+
 
         # sort
         self.assertEqual(conn.lpush('sort_test', 10), 1)
