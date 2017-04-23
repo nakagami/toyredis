@@ -160,6 +160,13 @@ class TestRedis(unittest.TestCase):
         conn.zrem('set_test', 'bar')
         with self.assertRaises(ValueError):
             conn.zrem('set_test', 'bar')
+        conn.zadd('set_test', 1, 'bar')
+        conn.zadd('set_test', 3, 'baz')
+        self.assertEqual(conn.zrange('set_test', 0, 3), ['bar', 'foo', 'baz'])
+        self.assertEqual(
+            list(conn.zrange('set_test', 0, 3, withscores=True)),
+            [('bar', 1), ('foo', 2), ('baz', 3)],
+        )
 
         conn.close()
 

@@ -271,8 +271,20 @@ class RedisConnection:
     def zrevrank(self, k, m):
         return self.command([b'ZREVRANK', k, m])
 
-    # TODO: zrange
-    # TODO: zrevrange
+    def zrange(self, k, start, end, withscores=False):
+        if withscores:
+            r = self.command([b'ZRANGE', k, start, end, 'WITHSCORES'])
+            return [(v, int(score)) for v, score in zip(r[::2], r[1::2])]
+        else:
+            return self.command([b'ZRANGE', k, start, end])
+
+    def zrevrange(self, k, start, end, withscores=False):
+        if withscores:
+            r = self.command([b'ZREVRANGE', k, start, end, 'WITHSCORES'])
+            return [(v, int(score)) for v, score in zip(r[::2], r[1::2])]
+        else:
+            return self.command([b'ZREVRANGE', k, start, end])
+
     # TODO: zrangebyscore
 
     def zcount(self, k, min_m, max_m):
