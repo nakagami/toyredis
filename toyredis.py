@@ -262,19 +262,34 @@ class RedisConnection:
         if r == 0:
             raise ValueError('value not found')
 
-    def zincrby(self, k, v, m):
-        return self.command([b'ZINCRBY', k, v, m])
+    def zincrby(self, k, i, m):
+        return self.command([b'ZINCRBY', k, i, m])
 
-    # TODO: zrank
-    # TODO: zrevrank
+    def zrank(self, k, m):
+        return self.command([b'ZRANK', k, m])
+
+    def zrevrank(self, k, m):
+        return self.command([b'ZREVRANK', k, m])
+
     # TODO: zrange
     # TODO: zrevrange
     # TODO: zrangebyscore
-    # TODO: zcount
-    # TODO: zcard
-    # TODO: zscope
-    # TODO: zremrangebyrank
-    # TODO: zremrangebyscore
+
+    def zcount(self, k, min_m, max_m):
+        return self.command([b'ZCOUNT', k, min_m, max_m])
+
+    def zcard(self, k):
+        return self.command([b'ZCARD', k])
+
+    def zscore(self, k, e):
+        return self.command([b'ZSCORE', k, e])
+
+    def zremrangebyrank(self, k, start, end):
+        return self.command([b'ZREMRANGEBYRANK', k, start, end])
+
+    def zremrangebyscore(self, k, start, end):
+        return self.command([b'ZREMRANGEBYSCORE', k, start, end])
+
     # TODO: zunionstore
     # TODO: zinterstore
 
